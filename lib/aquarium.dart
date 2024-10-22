@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'fish.dart';
 
 class AquariumScreen extends StatefulWidget {
@@ -6,16 +7,72 @@ class AquariumScreen extends StatefulWidget {
   _AquariumScreenState createState() => _AquariumScreenState();
 }
 
-class _AquariumScreenState extends State<AquariumScreen> {
+class _AquariumScreenState extends State<AquariumScreen>
+    with SingleTickerProviderStateMixin {
   List<Fish> fishList = [];
   Color selectedColor = Colors.blue;
   double selectedSpeed = 1.0;
+  bool collisionEffectEnabled = true;
 
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+    _controller.addListener(_updateFishPositions);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // Add fish to the aquarium
   void _addFish() {
     if (fishList.length < 10) {
       setState(() {
         fishList.add(Fish(color: selectedColor, speed: selectedSpeed));
       });
+    }
+  }
+
+  // Update the positions of fish and check for collisions
+  void _updateFishPositions() {
+    setState(() {
+      for (var fish in fishList) {
+        fish.moveFish(); // Move fish
+      }
+      if (collisionEffectEnabled) {
+        _checkAllCollisions(); // Check for collisions if enabled
+      }
+    });
+  }
+
+  // Check if two fish collide and apply behavior
+  void _checkForCollision(Fish fish1, Fish fish2) {
+    if ((fish1.position.dx - fish2.position.dx).abs() < 20 &&
+        (fish1.position.dy - fish2.position.dy).abs() < 20) {
+      fish1.changeDirection();
+      fish2.changeDirection();
+      setState(() {
+        fish1.color = Random().nextBool()
+            ? Colors.blue
+            : Colors.red; // Change fish color randomly
+      });
+    }
+  }
+
+  // Check all fish for potential collisions
+  void _checkAllCollisions() {
+    for (int i = 0; i < fishList.length; i++) {
+      for (int j = i + 1; j < fishList.length; j++) {
+        _checkForCollision(fishList[i], fishList[j]);
+      }
     }
   }
 
@@ -28,6 +85,7 @@ class _AquariumScreenState extends State<AquariumScreen> {
       body: Column(
         children: [
           SizedBox(height: 20),
+          // Container that represents the aquarium
           Container(
             width: 300,
             height: 300,
@@ -39,6 +97,7 @@ class _AquariumScreenState extends State<AquariumScreen> {
             ),
           ),
           SizedBox(height: 20),
+          // Buttons to add fish and save settings
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -49,13 +108,14 @@ class _AquariumScreenState extends State<AquariumScreen> {
               SizedBox(width: 20),
               ElevatedButton(
                 onPressed: () {
-                  // Add functionality to save to local storage
+                  // Save settings to local storage (to be implemented)
                 },
                 child: Text('Save Settings'),
               ),
             ],
           ),
           SizedBox(height: 20),
+          // Slider to control fish speed
           Slider(
             value: selectedSpeed,
             onChanged: (newSpeed) {
@@ -68,6 +128,7 @@ class _AquariumScreenState extends State<AquariumScreen> {
             divisions: 5,
             label: '$selectedSpeed',
           ),
+          // Dropdown to select fish color
           DropdownButton<Color>(
             value: selectedColor,
             items: [
@@ -78,6 +139,16 @@ class _AquariumScreenState extends State<AquariumScreen> {
             onChanged: (color) {
               setState(() {
                 selectedColor = color!;
+              });
+            },
+          ),
+          // Toggle switch for enabling/disabling collision effect
+          SwitchListTile(
+            title: Text('Enable Collision Effect'),
+            value: collisionEffectEnabled,
+            onChanged: (bool value) {
+              setState(() {
+                collisionEffectEnabled = value;
               });
             },
           ),

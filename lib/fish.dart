@@ -2,17 +2,27 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 class Fish {
-  final Color color;
+  Color color; // Removed 'final' to allow color change
   final double speed;
   Offset position;
   Random random = Random();
 
   Fish({required this.color, required this.speed})
-      : position = Offset(150, 150); // Initial position
+      : position = Offset(150, 150); // Initial position in the center
+
+  void moveFish() {
+    // Logic for moving the fish
+    double dx = random.nextDouble() * 2 - 1;
+    double dy = random.nextDouble() * 2 - 1;
+    position = Offset(position.dx + dx * speed, position.dy + dy * speed);
+  }
+
+  void changeDirection() {
+    // Logic for changing direction when a collision occurs
+  }
 
   Widget buildFish() {
-    return AnimatedPositioned(
-      duration: Duration(milliseconds: (1000 / speed).toInt()),
+    return Positioned(
       left: position.dx,
       top: position.dy,
       child: Container(
@@ -24,13 +34,5 @@ class Fish {
         ),
       ),
     );
-  }
-
-  void moveFish() {
-    // Add logic to move the fish randomly and bounce off the edges
-  }
-
-  void changeDirection() {
-    // Change direction of the fish
   }
 }

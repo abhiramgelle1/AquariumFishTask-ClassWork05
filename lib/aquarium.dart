@@ -10,7 +10,7 @@ class AquariumScreen extends StatefulWidget {
 class _AquariumScreenState extends State<AquariumScreen>
     with SingleTickerProviderStateMixin {
   List<Fish> fishList = [];
-  Color selectedColor = Colors.blue;
+  Color selectedColor = Colors.red; // Default fish color (red)
   double selectedSpeed = 1.0;
   bool collisionEffectEnabled = true;
 
@@ -61,8 +61,8 @@ class _AquariumScreenState extends State<AquariumScreen>
       fish2.changeDirection();
       setState(() {
         fish1.color = Random().nextBool()
-            ? Colors.blue
-            : Colors.red; // Change fish color randomly
+            ? Colors.red
+            : Colors.green; // Random color change
       });
     }
   }
@@ -90,6 +90,7 @@ class _AquariumScreenState extends State<AquariumScreen>
             width: 300,
             height: 300,
             decoration: BoxDecoration(
+              color: Colors.blue, // Set the aquarium background to blue
               border: Border.all(color: Colors.white),
             ),
             child: Stack(
@@ -128,13 +129,15 @@ class _AquariumScreenState extends State<AquariumScreen>
             divisions: 5,
             label: '$selectedSpeed',
           ),
-          // Dropdown to select fish color
+          // Dropdown to select fish color excluding blue (to avoid blending with the background)
           DropdownButton<Color>(
             value: selectedColor,
             items: [
-              DropdownMenuItem(value: Colors.blue, child: Text("Blue")),
               DropdownMenuItem(value: Colors.red, child: Text("Red")),
               DropdownMenuItem(value: Colors.green, child: Text("Green")),
+              DropdownMenuItem(value: Colors.yellow, child: Text("Yellow")),
+              DropdownMenuItem(value: Colors.orange, child: Text("Orange")),
+              DropdownMenuItem(value: Colors.purple, child: Text("Purple")),
             ],
             onChanged: (color) {
               setState(() {
